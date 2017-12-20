@@ -46,7 +46,7 @@ void handleRoot() {
     "<input type='text' name='mqtt_server' placeholder='MQTT server address' value='" + String(mqtt_server) + "'/><br/><input type='text' name='mqtt_port' placeholder='MQTT server port' value='" + String(mqtt_port) + "'/><br/>"
     "<select name='mqtt_secure'/><option>open connection</option><option" + String((mqtt_secure == true) ? " selected" : "") + ">secured</option></select><br/><input type='text' name='mqtt_user' placeholder='MQTT Username' value='" + String(mqtt_user) + "'/><br/>"
     "<input type='password' name='mqtt_pass' placeholder='MQTT Password' value='" + String(mqtt_pass) + "'/><br/>"
-    "<input type='text' name='mqtt_syncFreq' placeholder='Sync frequency, sec' value='" + String(mqtt_syncFreq) + "'/><br/>"
+    "<input type='text' name='mqtt_syncFreq' placeholder='Sync frequency, pulses' value='" + String(mqtt_syncFreq) + "'/><br/>"
     "<input type='submit' value='SAVE'/></form>"
   );  
   if (strlen(wifi_ssid) != 0){

@@ -25,8 +25,8 @@ String toStringIp(IPAddress ip) {
 //reset button
 void resetButton(){
   if (digitalRead(PIN_BUTTON) == LOW){
-    btnPressStart = millis();
-  } 
+    if (btnPressStart == 0) { btnPressStart = millis(); }
+  }
   else 
   {
     if (btnPressStart > 0) btnPressEnd = millis();
@@ -34,7 +34,7 @@ void resetButton(){
 
   if (btnPressStart != 0)
   {
-    if (btnPressEnd != 0) ESP.restart();
+    if (btnPressEnd != 0) { ESP.restart(); }
     if ((millis() - btnPressStart) > 5000) 
     {
       Serial.println("RESET");

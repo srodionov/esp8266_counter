@@ -29,7 +29,6 @@ char              mqtt_user[16]   = {0};
 char              mqtt_pass[16]   = {0};
 char              mqtt_topic[32]  = {0};
 int               mqtt_syncFreq   = 30;             // how often we have to send MQTT message
-unsigned long     mqtt_lastSync   = 0;
 char              buf[12];
 
 int               state           = 0;
@@ -100,33 +99,36 @@ void loop() {
       digitalWrite(PIN_LED, HIGH);
       
       if (millis() < wifi_lastCon) wifi_lastCon = millis();
-      if (millis() > (wifi_lastCon + 60000) ) {    //reconnect WiFi 
+      if (millis() > (wifi_lastCon + 60000) || (wifi_lastCon == 0)) {    //reconnect WiFi 
         //Serial.println("Reconnect Wi-Fi");
         WiFi.disconnect();
         delay(250);
         WiFi.begin (wifi_ssid, wifi_pass);
         wifi_lastCon = millis();
       }
-    } 
-
-    if (!mqtt_client.connected()) { 
-      digitalWrite(PIN_LED, HIGH);
-      mqtt_client.connect(ap_ssid);
-    } 
+    } else {
+      //Serial.println("Wi-Fi connected");
+      if (!mqtt_client.connected()) { 
+        digitalWrite(PIN_LED, HIGH);
+        mqtt_client.connect(ap_ssid);
+        //Serial.println("Reconnect MQTT");
+      } 
+    }
 
     if (mqtt_client.connected())
     {  
-        if (millis() < mqtt_lastSync) mqtt_lastSync = millis();
-        if (((millis() - mqtt_lastSync) >= mqtt_lastSync * 1000) || (mqtt_lastSync == 0)) {
-          dtostrf(counterValue,4,8,buf);       
+        //Serial.println("MQTT connected");
+        if (counterValue >= mqtt_syncFreq) {
+          Serial.println("send MQTT message");
+          sprintf(buf, "%d", counterValue);          
           mqtt_client.publish(mqtt_topic, buf);
           counterValue = 0;
-          mqtt_lastSync = millis();
+          mqtt_client.loop();
         }
-        mqtt_client.loop();  
     }
   
     state = digitalRead(PIN_COUNTER);
+    delay(5);
     digitalWrite(PIN_LED, state);                   // set the same state as COUNTER PIN
     if (state != prevState) 
     {
