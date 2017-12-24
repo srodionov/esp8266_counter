@@ -34,7 +34,10 @@ void resetButton(){
 
   if (btnPressStart != 0)
   {
-    if (btnPressEnd != 0) { ESP.restart(); }
+    if (btnPressEnd != 0) { 
+      Serial.println("RESTART");
+      ESP.restart(); 
+    }
     if ((millis() - btnPressStart) > 5000) 
     {
       Serial.println("RESET");

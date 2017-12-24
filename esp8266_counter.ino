@@ -100,56 +100,71 @@ void loop() {
       
       if (millis() < wifi_lastCon) wifi_lastCon = millis();
       if (millis() > (wifi_lastCon + 60000) || (wifi_lastCon == 0)) {    //reconnect WiFi 
-        //Serial.println("Reconnect Wi-Fi");
+        Serial.println("");
+        Serial.println("Connect Wi-Fi");
         WiFi.disconnect();
         delay(250);
         WiFi.begin (wifi_ssid, wifi_pass);
         wifi_lastCon = millis();
       }
-    } else {
-      //Serial.println("Wi-Fi connected");
-      if (!mqtt_client.connected()) { 
-        digitalWrite(PIN_LED, HIGH);
-        mqtt_client.connect(ap_ssid);
-        //Serial.println("Reconnect MQTT");
-      } 
-    }
-
-    if (mqtt_client.connected())
-    {  
-        //Serial.println("MQTT connected");
-        if (counterValue >= mqtt_syncFreq) {
-          Serial.println("send MQTT message");
-          sprintf(buf, "%d", counterValue);          
+      delay(250);
+      digitalWrite(PIN_LED, LOW);
+      delay(250);
+      Serial.print(".");
+    } 
+    else 
+    {
+      if (counterValue >= mqtt_syncFreq) 
+      {
+        sprintf(buf, "%d", counterValue); 
+          
+        if (!mqtt_client.connected()) 
+        { 
+          Serial.println("");
+          Serial.println("Connect MQTT");          
+          if (mqtt_client.connect(ap_ssid)) 
+          {
+            Serial.println("MQTT connected");
+          } 
+          else 
+          {
+            Serial.print("MQTT failed, rc=");
+            Serial.print(mqtt_client.state());    
+          }
+        }
+        if (mqtt_client.connected()) 
+        {
           mqtt_client.publish(mqtt_topic, buf);
           counterValue = 0;
           mqtt_client.loop();
         }
-    }
-  
-    state = digitalRead(PIN_COUNTER);
-    delay(5);
-    digitalWrite(PIN_LED, state);                   // set the same state as COUNTER PIN
-    if (state != prevState) 
-    {
-      prevState = state;              
-      if (firstPass == true)
-      {
-        firstPass = false;
-      } 
-      else 
-      {
-        firstPass = true;
-        counterValue = counterValue + 1;
-        //Serial.print("pulse: ");
-        //Serial.println(counterValue);
       }
     }   
   }
 
+  state = digitalRead(PIN_COUNTER);
+  delay(10);
+  digitalWrite(PIN_LED, state);                   // set the same state as COUNTER PIN
+
+  if (state != prevState) 
+  {
+    prevState = state;              
+    if (firstPass == true)
+    {
+      firstPass = false;
+    } 
+    else 
+    {
+      firstPass = true;
+      counterValue = counterValue + 1;
+      Serial.print("pulse: ");
+      Serial.println(counterValue);
+    }
+  }
+      
   //HTTP
   server.handleClient();
  
-  resetButton();
+  resetButton();    
 }
 
